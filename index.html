@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>检查关键词</title>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.7/dayjs.min.js" integrity="sha512-hcV6DX35BKgiTiWYrJgPbu3FxS6CsCjKgmrsPRpUPkXWbvPiKxvSVSdhWX0yXcPctOI2FJ4WP6N1zH+17B/sAA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/5.3.3/antd.js" integrity="sha512-ty6I60RW7p61GOn+AUjIa/3vSJNMYny4Ngm3w0RApVvVok02j0LYq0y7SrunhSuII0ZWfrd5knIHE/Zu40Bt3w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/5.3.3/reset.css" integrity="sha512-pZC2IRT+WsRU/IqN5Bhe0rqQVQUOOQhMrChWriipYy+lcncFKe9C+7p+CI2bz+jqlMAxOulcioNxbvZcsD7erw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+      .textarea {
+        width: 45%;
+        height: 90% !important;
+        color: rgba(0, 0, 0, 0.88);
+        font-size: 12px;
+        line-height: 20px;
+        overflow-y: scroll;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+      .wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: space-around;
+        flex-direction: row;
+        align-items: center;
+      }
+      .ant-tag {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+        line-height: 20px;
+        list-style: none;
+        font-family: -apple-system,BlinkMacSystemFont,segoe ui,Roboto,helvetica neue,Arial,noto sans,sans-serif,apple color emoji,segoe ui emoji,segoe ui symbol,noto color emoji;
+        display: inline-block;
+        height: auto;
+        padding-inline: 7px;
+        white-space: nowrap;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        opacity: 1;
+        transition: all .2s;
+        text-align: start;
+        color: #ff4d4f;
+        background: #fff2f0;
+        border-color: #ffccc7;
+      }
+      .text-item {
+        margin-bottom: 10px;
+      }
+      .operation {
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel" data-presets="env,react">
+      const ban = ['Blood','Bloodbath','Crucifixion','Bloody','Flesh','Bruises','Car crash','Corpse','Crucified','Cutting','Decapitate','Infested','Gruesome','Kill','Infected','Sadist','Slaughter','Teratoma','Tryphophobia','Wound','Cronenberg','Khorne','Cannibal','Cannibalism','Visceral','Guts','Bloodshot','Gory','Killing','Surgery','Vivisection','Massacre','Hemoglobin','Suicide','Female Body Parts','ahegao','pinup','ballgag','Playboy','Bimbo','pleasure','bodily fluids','pleasures','boudoir','rule34','brothel','seducing','dominatrix','seductive','erotic seductive','fuck','sensual','Hardcore','sexy','Hentai','Shag','horny','shibari','incest','Smut','jav','succubus','Jerk off king at pic','thot','kinbaku','transparent','legs spread','twerk','making love','voluptuous','naughty','wincest','orgy','XXX','Arse','Labia','Ass','Mammaries','Badonkers','Minge','Big Ass','Mommy Milker','Booba','Nipple','Booty','Oppai','Bosom','Organs','Breasts','Ovaries','Busty','Penis','Clunge','Phallus','Crotch','sexy female','Dick','Skimpy','Girth','Thick','Honkers','Vagina','Hooters','Veiny','Knob','no clothes','au naturale','no shirt','bare chest','nude','barely dressed','bra','risqué','clear','scantily','clad','cleavage','stripped','full frontal unclothed','invisible clothes','wearing nothing','lingerie with no shirt','naked','without clothes on','negligee','zero clothes','Taboo','Fascist','Nazi','Prophet Mohammed','Slave','Coon','Honkey','Drugs','Cocaine','Heroin','Meth','Crack','Torture','Disturbing','Farts,Fart','Poop','Warts','Shit','Brown pudding','Bunghole','Vomit','Voluptuous','Seductive','Sperm','Hot','Sexy','Sensored','Censored','Silenced','Deepfake','Inappropriate','Pus','Waifu','mp5','Succubus','1488','Surgery', 'corpse'].map(item => item.toLocaleLowerCase())
+
+      const whiteList  = ['a', 'front', 'in', 'with', 'the', 'on', 'to', 'of', 'he', 'as', 'natural', 'no', 'invisible', 'barely', 'an', 'at', 'shot', 'visible', 'or', 'body', 'up', 'it', 'all', 'part', 'is', 'lab', 'wearing', 'without', 'love', 'photograph', '--ar', 
+    '--v', 'passes', 'ar', 'v', 'out']
+      
+      const { Input, Button, Space, Tag } = antd
+      const { useState } = React
+
+      console.log('------useState------', React)
+    
+      function MyApp() {
+        const [prompt, setPrompt] = useState('')
+        const [res, setRes] = useState('')
+        const [error, setError] = useState(0)
+
+        const updatePrompt = () => {
+          setError(0)
+          setRes(prompt.split(' ').map(item => {
+            const itemCopy = item.replace(/[^\w\s]/gi, '').toLocaleLowerCase()
+            let isBaned = false
+            if (!whiteList.includes(itemCopy)) {
+              ban.forEach(ban => {
+                if (ban.includes(itemCopy) || itemCopy.includes(ban)) {
+                  isBaned = true
+                }
+              })
+            }
+           
+            if (isBaned) {
+              setError(prv => prv + 1)
+              return `<span class="ant-tag ant-tag-processing css-1e3x2xa">${item}</span>`
+            } else {
+              if (item === `5
+
+/imagine`) {
+                return `5$$$$/imagine`
+              } else {
+                return item
+              }
+            }
+          }).join(' '))
+        }
+
+        return (
+          <div className="wrapper">
+            <Input.TextArea className="textarea" onChange={(e) => setPrompt(e.target.value)} />
+            <Space className="operation" direction="vertical">
+              <Button onClick={() => updatePrompt()}>检查</Button>
+              <div>错误数<Tag color="error">{error}</Tag></div>
+            </Space>
+            
+            <div className="textarea">
+              {
+                res.split('$$$$').map((text) => {
+                  return (
+                    <div className="text-item" dangerouslySetInnerHTML={{__html:text}}></div>
+                  )
+                })
+              }  
+            </div>
+          </div>
+        );
+      }
+
+      const container = document.getElementById('root');
+      const root = ReactDOM.createRoot(container);
+      root.render(<MyApp />);
+
+    </script>
+  </body>
+</html>
